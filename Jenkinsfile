@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonarqube-token')
+        SONAR_TOKEN = credentials('sonarqube-token') // Reference to the SonarQube token
     }
 
     stages {
@@ -10,15 +10,15 @@ pipeline {
             steps {
                 echo 'Building the project...'
                 sh 'python3 -m venv venv'                   // Create virtual environment
-                sh '. venv/bin/activate'                    // Activate virtual environment
-                sh '/opt/anaconda3/bin/pip3 install -r requirements.txt' // Use full path to pip3
+                sh '. venv/bin/activate && pip install -r requirements.txt' // Install dependencies
+                sh '. venv/bin/activate && pip install pytest' // Install pytest in the virtual environment
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '. venv/bin/activate && pytest test_main.py'
+                sh '. venv/bin/activate && pytest test_main.py' // Run tests with pytest
             }
         }
 
@@ -46,4 +46,3 @@ pipeline {
         }
     }
 }
-
