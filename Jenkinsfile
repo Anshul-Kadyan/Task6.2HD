@@ -31,9 +31,9 @@ pipeline {
                         -Dsonar.projectKey=flask-pipeline-project \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${SONAR_TOKEN} // Correctly reference the SONAR_TOKEN
+                        -Dsonar.login=${SONAR_TOKEN}
                         '''
-                    } 
+                    }
                 }
             }
         }
