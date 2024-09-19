@@ -27,13 +27,14 @@ pipeline {
                 script {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
-                        sonar-scanner \
-                            -Dsonar.projectKey=flask-pipeline-project \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.login=${SONAR_TOKEN}
+                        ~/Downloads/sonar-scanner-6.1.0.4477-macosx-x64/bin/sonar-scanner \
+                        -Dsonar.projectKey=your_project_key \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=your_sonar_token
+
                         '''
-                    }
+                    } 
                 }
             }
         }
