@@ -1,48 +1,51 @@
 pipeline {
     agent any
-
     environment {
-        SONAR_TOKEN = credentials('sonarqube-token') // Reference to the SonarQube token
+        // SonarQube environment variables
+        SONARQUBE_URL = 'http://localhost:9000'
+        SONAR_TOKEN = credentials('sonar-token')
     }
-
     stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/Anshul-Kadyan/Task6.2HD.git'
+            }
+        }
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'python3 -m venv venv' // Create virtual environment
-                sh '. venv/bin/activate && pip install -r requirements.txt' // Install dependencies
-                sh '. venv/bin/activate && pip install pytest' // Install pytest in the virtual environment
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install -r requirements.txt
+                '''
             }
         }
-
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '. venv/bin/activate && pytest test_main.py' // Run tests with pytest
+                sh '''
+                    . venv/bin/activate
+                    pytest test_main.py
+                '''
             }
         }
-
         stage('SonarQube Analysis') {
+            environment {
+                scannerHome = tool 'SonarQube Scanner'
+            }
             steps {
-                script {
-                    withSonarQubeEnv('SonarQube') {
-                        sh '''
-                        ~/Downloads/sonar-scanner-6.1.0.4477-macosx-x64/bin/sonar-scanner \
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=flask-pipeline-project \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=${SONAR_TOKEN}
-                        '''
-                    }
+                        -Dsonar.host.url=$SONARQUBE_URL \
+                        -Dsonar.login=$SONAR_TOKEN \
+                        -Dsonar.sourceEncoding=UTF-8  # Explicitly setting source encoding
+                    """
                 }
             }
-        }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up...'
-            sh 'rm -rf venv' // Clean up virtual environment
         }
     }
 }
