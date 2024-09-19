@@ -2,29 +2,26 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonarqube-token') // Reference to the SonarQube token
+        SONAR_TOKEN = credentials('sonarqube-token')
     }
 
     stages {
-        // Step 1: Build Stage
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'python3 -m venv venv'            // Create virtual environment
-                sh '. venv/bin/activate'             // Activate the virtual environment
-                sh 'pip install -r requirements.txt' // Install dependencies
+                sh 'python3 -m venv venv'                   // Create virtual environment
+                sh '. venv/bin/activate'                    // Activate virtual environment
+                sh '/opt/anaconda3/bin/pip3 install -r requirements.txt' // Use full path to pip3
             }
         }
 
-        // Step 2: Test Stage
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '. venv/bin/activate && pytest test_main.py' // Run pytest
+                sh '. venv/bin/activate && pytest test_main.py'
             }
         }
 
-        // Step 3: SonarQube Code Quality Analysis
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -45,7 +42,8 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            sh 'rm -rf venv' // Clean up the virtual environment after the build
+            sh 'rm -rf venv'
         }
     }
 }
+
