@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonarqube-token') // Reference to the SonarQube token
+        SONAR_TOKEN = credentials('sonarqube-token') // SonarQube token
+        PATH = "/usr/local/bin:${env.PATH}" // Add Docker path to Jenkins environment
     }
 
     stages {
@@ -12,14 +13,14 @@ pipeline {
                 sh 'python3 -m venv venv' // Create virtual environment
                 sh '. venv/bin/activate && python3 -m pip install --upgrade pip' // Upgrade pip
                 sh '. venv/bin/activate && pip install -r requirements.txt' // Install dependencies
-                sh '. venv/bin/activate && pip install pytest' // Install pytest in the virtual environment
+                sh '. venv/bin/activate && pip install pytest' // Install pytest
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '. venv/bin/activate && pytest test_main.py' // Run tests with pytest
+                sh '. venv/bin/activate && pytest test_main.py' // Run tests
             }
         }
 
@@ -43,10 +44,10 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying the application using Docker...'
-                sh 'docker build -t flask-app .' // Build the Docker image
+                sh 'docker build -t flask-app .' // Build Docker image
                 sh 'docker stop flask-app || true' // Stop any existing container
-                sh 'docker rm flask-app || true' // Remove any existing container
-                sh 'docker run -d -p 3000:5000 --name flask-app flask-app' // Run the new container on port 3000
+                sh 'docker rm flask-app || true' // Remove the existing container
+                sh 'docker run -d -p 3000:5000 --name flask-app flask-app' // Run the Docker container
             }
         }
     }
@@ -54,7 +55,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            sh 'rm -rf venv' // Clean up virtual environment
+            sh 'rm -rf venv' // Clean up the virtual environment
         }
     }
 }
