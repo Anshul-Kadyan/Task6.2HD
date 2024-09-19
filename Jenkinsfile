@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonarqube-token') // SonarQube token
-        PATH = "/usr/local/bin:${env.PATH}" // Add Docker path to Jenkins environment
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS Access Key
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS Secret Key
     }
 
     stages {
@@ -45,19 +46,26 @@ pipeline {
             steps {
                 echo 'Deploying the application using Docker...'
                 sh 'docker build -t flask-app .' // Build Docker image
-                sh 'docker stop flask-app || echo "No running container"' // Stop any existing container
-                sh 'docker rm flask-app || echo "No existing container"' // Remove the existing container
+                sh 'docker stop flask-app || true' // Stop any existing container
+                sh 'docker rm flask-app || true' // Remove the existing container
                 sh 'docker run -d -p 3000:5000 --name flask-app flask-app' // Run the Docker container
             }
         }
 
-        stage('Release') {
+        // AWS CodeDeploy Stage
+        stage('AWS CodeDeploy') {
             steps {
-                echo 'Pushing Docker image to DockerHub...'
-                sh '''
-                docker tag flask-app anshul1413/flask-app:latest
-                docker push anshul1413/flask-app:latest
-                '''
+                echo 'Deploying to AWS CodeDeploy...'
+                script {
+                    sh '''
+                    aws deploy create-deployment \
+                    --application-name FlaskApp \
+                    --deployment-group-name <YourDeploymentGroupName> \
+                    --s3-location bucket=<YourS3Bucket>,key=flask-app.zip,bundleType=zip \
+                    --deployment-config-name CodeDeployDefault.OneAtATime \
+                    --region <YourRegion>
+                    '''
+                }
             }
         }
     }
@@ -66,7 +74,6 @@ pipeline {
         always {
             echo 'Cleaning up...'
             sh 'rm -rf venv' // Clean up the virtual environment
-            sh 'docker system prune -f' // Clean up Docker images and containers
         }
     }
 }
