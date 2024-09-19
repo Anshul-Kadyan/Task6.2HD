@@ -45,9 +45,19 @@ pipeline {
             steps {
                 echo 'Deploying the application using Docker...'
                 sh 'docker build -t flask-app .' // Build Docker image
-                sh 'docker stop flask-app || true' // Stop any existing container
-                sh 'docker rm flask-app || true' // Remove the existing container
+                sh 'docker stop flask-app || echo "No running container"' // Stop any existing container
+                sh 'docker rm flask-app || echo "No existing container"' // Remove the existing container
                 sh 'docker run -d -p 3000:5000 --name flask-app flask-app' // Run the Docker container
+            }
+        }
+
+        stage('Release') {
+            steps {
+                echo 'Pushing Docker image to DockerHub...'
+                sh '''
+                docker tag flask-app anshul1413/flask-app:latest
+                docker push anshul1413/flask-app:latest
+                '''
             }
         }
     }
@@ -56,6 +66,7 @@ pipeline {
         always {
             echo 'Cleaning up...'
             sh 'rm -rf venv' // Clean up the virtual environment
+            sh 'docker system prune -f' // Clean up Docker images and containers
         }
     }
 }
