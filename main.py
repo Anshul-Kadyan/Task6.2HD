@@ -14,7 +14,7 @@ class Calculator:
 
     def divide(self, a, b):
         if b == 0:
-            return "Cannot divide by zero"
+            raise ValueError("Cannot divide by zero")
         return a / b
 
 # Create routes for each operation
