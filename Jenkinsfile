@@ -9,7 +9,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'python3 -m venv venv'                   // Create virtual environment
+                sh 'python3 -m venv venv' // Create virtual environment
                 sh '. venv/bin/activate && pip install -r requirements.txt' // Install dependencies
                 sh '. venv/bin/activate && pip install pytest' // Install pytest in the virtual environment
             }
@@ -28,11 +28,10 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh '''
                         ~/Downloads/sonar-scanner-6.1.0.4477-macosx-x64/bin/sonar-scanner \
-                        -Dsonar.projectKey=your_project_key \
+                        -Dsonar.projectKey=flask-pipeline-project \
                         -Dsonar.sources=. \
                         -Dsonar.host.url=http://localhost:9000 \
-                        -Dsonar.login=your_sonar_token
-
+                        -Dsonar.login=${SONAR_TOKEN} // Correctly reference the SONAR_TOKEN
                         '''
                     } 
                 }
@@ -43,7 +42,7 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            sh 'rm -rf venv'
+            sh 'rm -rf venv' // Clean up virtual environment
         }
     }
 }
