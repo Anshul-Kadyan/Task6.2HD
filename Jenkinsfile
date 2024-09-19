@@ -39,6 +39,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying the application using Docker...'
+                sh 'docker build -t flask-app .' // Build the Docker image
+                sh 'docker stop flask-app || true' // Stop any existing container
+                sh 'docker rm flask-app || true' // Remove any existing container
+                sh 'docker run -d -p 3000:5000 --name flask-app flask-app' // Run the new container on port 3000
+            }
+        }
     }
 
     post {
