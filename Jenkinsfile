@@ -42,7 +42,7 @@ pipeline {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'aws-codedeploy-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                     sh '''
                     aws deploy create-deployment \
-                    --application-name FlaskApp \
+                    --application-name FlaskAppDeploy \
                     --deployment-group-name FlaskAppDeploymentGroup \
                     --s3-location bucket=flask-app-deployment-bucket,key=flask-app.zip,bundleType=zip \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
