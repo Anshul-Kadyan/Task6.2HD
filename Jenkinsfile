@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonarqube-token') // SonarQube token
-        PATH = "/usr/local/bin:${env.PATH}" // Add Docker path to Jenkins environment
-        AWS_CREDENTIALS = credentials('aws-codedeploy-credentials') // AWS CodeDeploy Credentials
+    PATH = "/usr/local/bin:/usr/bin:/bin:${env.PATH}" // Update PATH to include AWS CLI
+    AWS_CREDENTIALS = credentials('aws-codedeploy-credentials') // AWS CodeDeploy Credentials
+
     }
 
     stages {
