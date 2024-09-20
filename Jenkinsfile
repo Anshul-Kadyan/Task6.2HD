@@ -3,11 +3,11 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonarqube-token') // SonarQube token
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS Access Key
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS Secret Key
+        AWS_CREDENTIALS = credentials('aws-codedeploy-credentials') // AWS CodeDeploy Credentials
     }
 
     stages {
+        // Build Stage
         stage('Build') {
             steps {
                 echo 'Building the project...'
@@ -18,6 +18,7 @@ pipeline {
             }
         }
 
+        // Test Stage
         stage('Test') {
             steps {
                 echo 'Running tests...'
@@ -25,7 +26,8 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        // Code Quality Analysis Stage
+        stage('Code Quality Analysis') {
             steps {
                 script {
                     withSonarQubeEnv('SonarQube') {
@@ -42,6 +44,7 @@ pipeline {
             }
         }
 
+        // Deploy Stage
         stage('Deploy') {
             steps {
                 echo 'Deploying the application using Docker...'
@@ -52,20 +55,29 @@ pipeline {
             }
         }
 
-        // AWS CodeDeploy Stage
-        stage('AWS CodeDeploy') {
+        // Release Stage (AWS CodeDeploy)
+        stage('Release') {
             steps {
                 echo 'Deploying to AWS CodeDeploy...'
                 script {
                     sh '''
                     aws deploy create-deployment \
                     --application-name FlaskApp \
-                    --deployment-group-name <YourDeploymentGroupName> \
-                    --s3-location bucket=<YourS3Bucket>,key=flask-app.zip,bundleType=zip \
+                    --deployment-group-name FlaskAppDeploymentGroup \
+                    --s3-location bucket=flask-app-deployment-bucket,key=flask-app.zip,bundleType=zip \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
-                    --region <YourRegion>
+                    --region ap-southeast-2 \
+                    --profile ${AWS_CREDENTIALS}
                     '''
                 }
+            }
+        }
+
+        // Monitoring & Alerting (Optional for High HD)
+        stage('Monitoring & Alerting') {
+            steps {
+                echo 'Setting up monitoring and alerting...'
+                // Add monitoring and alerting tool configuration (e.g., Datadog, New Relic)
             }
         }
     }
