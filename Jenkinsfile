@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonarqube-token') // SonarQube token
+        PATH = "/usr/local/bin:${env.PATH}" // Add Docker path to Jenkins environment
         AWS_CREDENTIALS = credentials('aws-codedeploy-credentials') // AWS CodeDeploy Credentials
     }
 
@@ -67,7 +68,8 @@ pipeline {
                     --s3-location bucket=flask-app-deployment-bucket,key=flask-app.zip,bundleType=zip \
                     --deployment-config-name CodeDeployDefault.OneAtATime \
                     --region ap-southeast-2 \
-                    --profile ${AWS_CREDENTIALS}
+                    --access-key-id ${AWS_CREDENTIALS_USR} \
+                    --secret-access-key ${AWS_CREDENTIALS_PSW}
                     '''
                 }
             }
