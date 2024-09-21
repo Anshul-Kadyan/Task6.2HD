@@ -59,18 +59,17 @@ pipeline {
                 sh '''
                 curl -X POST \
                 -H "Content-type: application/json" \
-                -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+                -H "DD-API-KEY: bc28dec36125d757f8c58803d7c48ea5" \
                 -d '{
-                    "title": "Jenkins Monitoring Alert",
-                    "text": "Monitoring FlaskApp for performance issues.",
+                    "title": "Test Event",
+                    "text": "Testing Datadog API integration.",
                     "priority": "normal",
                     "alert_type": "info"
                 }' \
                 https://api.datadoghq.com/api/v1/events
                 '''
                 
-                // Remove or handle sudo for starting Datadog agent
-                // sudo systemctl start datadog-agent
+
             }
         }
     }
