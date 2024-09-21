@@ -11,21 +11,36 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'python3 -m venv venv && . venv/bin/activate && python3 -m pip install --upgrade pip && pip install -r requirements.txt'
+                sh '''
+                python3 -m venv venv
+                . venv/bin/activate
+                python3 -m pip install --upgrade pip
+                pip install -r requirements.txt
+                '''
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '. venv/bin/activate && pytest test_main.py'
+                sh '''
+                . venv/bin/activate
+                pytest test_main.py
+                '''
             }
         }
 
         stage('Code Quality Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh '/Users/kadyan/Downloads/sonar-scanner-6.1.0.4477-macosx-x64/bin/sonar-scanner -Dsonar.projectKey=flask-pipeline-project -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.token=${SONAR_TOKEN} -Dsonar.exclusions=venv/**'
+                    sh '''
+                    /Users/kadyan/Downloads/sonar-scanner-6.1.0.4477-macosx-x64/bin/sonar-scanner \
+                    -Dsonar.projectKey=flask-pipeline-project \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=http://localhost:9000 \
+                    -Dsonar.token=${SONAR_TOKEN} \
+                    -Dsonar.exclusions=venv/**
+                    '''
                 }
             }
         }
@@ -33,7 +48,12 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying the application using Docker...'
-                sh 'docker build -t flask-app . && docker stop flask-app || true && docker rm flask-app || true && docker run -d -p 3000:5000 --name flask-app flask-app'
+                sh '''
+                docker build -t flask-app .
+                docker stop flask-app || true
+                docker rm flask-app || true
+                docker run -d -p 3000:5000 --name flask-app flask-app
+                '''
             }
         }
 
@@ -54,23 +74,21 @@ pipeline {
         }
 
         stage('Monitoring and Alerting') {
-    steps {
-        echo 'Monitoring application using Datadog...'
-        sh '''
-        curl -X POST \
-        -H "Content-type: application/json" \
-        -H "DD-API-KEY: ${DATADOG_API_KEY}" \
-        -d '{
-            "title": "Jenkins Monitoring Alert",
-            "text": "Monitoring FlaskApp for performance issues.",
-            "priority": "normal",
-            "alert_type": "info"
-        }' \
-        https://api.us5.datadoghq.com/api/v1/events
-        '''
-    }
-}
-
+            steps {
+                echo 'Monitoring application using Datadog...'
+                sh '''
+                curl -X POST \
+                -H "Content-type: application/json" \
+                -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+                -d '{
+                    "title": "Jenkins Monitoring Alert",
+                    "text": "Monitoring FlaskApp for performance issues.",
+                    "priority": "normal",
+                    "alert_type": "info"
+                }' \
+                https://api.us5.datadoghq.com/api/v1/events
+                '''
+            }
         }
     }
 
