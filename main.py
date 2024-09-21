@@ -1,4 +1,12 @@
 from flask import Flask
+from ddtrace import tracer, patch_all
+import os
+
+# Enable Datadog APM instrumentation for all libraries
+patch_all()
+
+# Configure Datadog tracer if needed (replace 'localhost' with the actual Datadog Agent host if it's not local)
+tracer.configure(hostname='localhost', port=8126)
 
 app = Flask(__name__)
 
@@ -47,4 +55,5 @@ def divide(a, b):
     return f"Division: {result}"
 
 if __name__ == '__main__':
+    # Run Flask app with Datadog tracing enabled
     app.run(host='0.0.0.0', port=5000)
