@@ -54,23 +54,23 @@ pipeline {
         }
 
         stage('Monitoring and Alerting') {
-            steps {
-                echo 'Monitoring application using Datadog...'
-                sh '''
-                curl -X POST \
-                -H "Content-type: application/json" \
-                -H "DD-API-KEY: bc28dec36125d757f8c58803d7c48ea5" \
-                -d '{
-                    "title": "Test Event",
-                    "text": "Testing Datadog API integration.",
-                    "priority": "normal",
-                    "alert_type": "info"
-                }' \
-                https://api.datadoghq.com/api/v1/events
-                '''
-                
+    steps {
+        echo 'Monitoring application using Datadog...'
+        sh '''
+        curl -X POST \
+        -H "Content-type: application/json" \
+        -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+        -d '{
+            "title": "Jenkins Monitoring Alert",
+            "text": "Monitoring FlaskApp for performance issues.",
+            "priority": "normal",
+            "alert_type": "info"
+        }' \
+        https://api.us5.datadoghq.com/api/v1/events
+        '''
+    }
+}
 
-            }
         }
     }
 
