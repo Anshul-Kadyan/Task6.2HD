@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonarqube-token') // SonarQube token
-        PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}" // Docker and AWS CLI paths
-        DATADOG_API_KEY = credentials('datadog-api-key') // Datadog API key
+        SONAR_TOKEN = credentials('sonarqube-token') 
+        DATADOG_API_KEY = credentials('datadog-api-key') 
+        PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
     }
 
     stages {
@@ -56,23 +56,21 @@ pipeline {
         stage('Monitoring and Alerting') {
             steps {
                 echo 'Monitoring application using Datadog...'
-
-                // Trigger Datadog events and alerts
                 sh '''
                 curl -X POST \
                 -H "Content-type: application/json" \
                 -H "DD-API-KEY: ${DATADOG_API_KEY}" \
                 -d '{
-                      "title": "Jenkins Monitoring Alert",
-                      "text": "Monitoring FlaskApp for performance issues.",
-                      "priority": "normal",
-                      "alert_type": "info"
-                    }' \
+                    "title": "Jenkins Monitoring Alert",
+                    "text": "Monitoring FlaskApp for performance issues.",
+                    "priority": "normal",
+                    "alert_type": "info"
+                }' \
                 https://api.datadoghq.com/api/v1/events
                 '''
-
-                // Start Datadog agent on the server (if not already running)
-                sh 'sudo systemctl start datadog-agent'
+                
+                // Remove or handle sudo for starting Datadog agent
+                // sudo systemctl start datadog-agent
             }
         }
     }
